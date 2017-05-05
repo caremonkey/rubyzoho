@@ -48,6 +48,11 @@ for example,
 and wrap the code calling the API in a <tt>begin ... rescue</tt> block.
 
 
+      config.save_format = 2
+
+Allows us to set the ```newFormat``` parameter while inserting or updating the Zoho API.
+
+
 === Ruby
 Make sure the following block is executed prior to making calls to the gem.
 
@@ -94,7 +99,7 @@ To retrieve an existing record:
 
 Returns one or more records matching the query. The find_by_<attribute> follows
 ActiveRecord style reflections, so if the attribute is present in the API, it can
-be queried. There is currently a single attribute limitation imposed by the Zoho 
+be queried. There is currently a single attribute limitation imposed by the Zoho
 API. Note, what is returned is an Array class which is also Enumerable. Use +.each+,
 +.map+, +.first+, +.last+, etc to navigate through the result set.
 
@@ -337,4 +342,3 @@ Copyright (c) 2013 - 2015 amalc (\@\amalc). Released under the MIT license. See 
 [0.1.1 - 0.1.6] Alpha Releases
                 1. Configuration block signature changed
 [0.0.1 - 0.0.5] Alpha Releases
-

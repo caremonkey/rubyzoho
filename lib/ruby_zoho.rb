@@ -5,7 +5,7 @@ require 'yaml'
 module RubyZoho
 
   class Configuration
-    attr_accessor :api, :api_key, :cache_fields, :cache_path, :crm_modules, :ignore_fields_with_bad_names
+    attr_accessor :api, :api_key, :cache_fields, :cache_path, :crm_modules, :ignore_fields_with_bad_names, :save_format
 
     def initialize
       self.api_key = nil
@@ -14,6 +14,7 @@ module RubyZoho
       self.cache_path = File.join(File.dirname(__FILE__), '..', 'spec', 'fixtures')
       self.crm_modules = nil
       self.ignore_fields_with_bad_names = true
+      self.save_format = 1
     end
   end
 
@@ -37,9 +38,9 @@ module RubyZoho
     if File.exists?(File.join(cache_path, 'fields.snapshot')) && cache_fields == true
       fields = YAML.load(File.read(File.join(cache_path, 'fields.snapshot')))
       zoho = ZohoApi::Crm.new(api_key, modules,
-                              self.configuration.ignore_fields_with_bad_names, fields)
+                              self.configuration.ignore_fields_with_bad_names, self.configuration.save_format, fields)
     else
-      zoho = ZohoApi::Crm.new(api_key, modules, self.configuration.ignore_fields_with_bad_names)
+      zoho = ZohoApi::Crm.new(api_key, modules, self.configuration.ignore_fields_with_bad_names, self.configuration.save_format)
       fields = zoho.module_fields
       File.open(File.join(cache_path, 'fields.snapshot'), 'wb') { |file| file.write(fields.to_yaml) } if cache_fields == true
     end

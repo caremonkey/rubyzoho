@@ -25,11 +25,12 @@ module ZohoApi
 
     attr_reader :auth_token, :module_fields
 
-    def initialize(auth_token, modules, ignore_fields, fields = nil)
+    def initialize(auth_token, modules, ignore_fields, save_format, fields = nil)
       @auth_token = auth_token
       @modules = %w(Accounts Contacts Events Leads Potentials Tasks Users).concat(modules).uniq
       @module_fields = fields.nil? ? reflect_module_fields : fields
       @ignore_fields = ignore_fields
+      @save_format   = save_format
     end
 
     def add_record(module_name, fields_values_hash)
@@ -38,7 +39,7 @@ module ZohoApi
       row = element.add_element 'row', {'no' => '1'}
       fields_values_hash.each_pair { |k, v| add_field(row, k, v, module_name) }
       r = self.class.post(create_url(module_name, 'insertRecords'),
-                          :query => {:newFormat => 1, :authtoken => @auth_token,
+                          :query => {:newFormat => @save_format, :authtoken => @auth_token,
                                      :scope => 'crmapi', :xmlData => x, :wfTrigger => 'true'},
                           :headers => {'Content-length' => '0'})
       check_for_errors(r)
@@ -56,7 +57,7 @@ module ZohoApi
       end
 
       r = self.class.post(create_url(module_name, 'insertRecords'),
-                          :query => {:newFormat => 1, :authtoken => @auth_token,
+                          :query => {:newFormat => @save_format, :authtoken => @auth_token,
                                      :scope => 'crmapi', :xmlData => x, :wfTrigger => 'true'},
                           :headers => {'Content-length' => '0'})
       check_for_errors(r)
@@ -114,7 +115,7 @@ module ZohoApi
 
     def post_action(module_name, record_id, action_type)
       r = self.class.post(create_url(module_name, action_type),
-                          :query => {:newFormat => 1, :authtoken => @auth_token,
+                          :query => {:newFormat => @save_format, :authtoken => @auth_token,
                                      :scope => 'crmapi', :id => record_id},
                           :headers => {'Content-length' => '0'})
       raise('Adding contact failed', RuntimeError, r.response.body.to_s) unless r.response.code == '200'
@@ -185,7 +186,7 @@ module ZohoApi
       related_module_fields[:xml_data].each_pair { |k, v| add_field(row, k, v, parent_module) }
 
       r = self.class.post(create_url("#{parent_module}", 'updateRelatedRecords'),
-                          :query => {:newFormat => 1,
+                          :query => {:newFormat => @save_format,
                                      :id => parent_record_id,
                                      :authtoken => @auth_token, :scope => 'crmapi',
                                      :relatedModule => related_module_fields[:related_module],
@@ -200,8 +201,9 @@ module ZohoApi
       contacts = x.add_element module_name
       row = contacts.add_element 'row', {'no' => '1'}
       fields_values_hash.each_pair { |k, v| add_field(row, k, v, module_name) }
+
       r = self.class.post(create_url(module_name, 'updateRecords'),
-                          :query => {:newFormat => 1, :authtoken => @auth_token,
+                          :query => {:newFormat => @save_format, :authtoken => @auth_token,
                                      :scope => 'crmapi', :id => id,
                                      :xmlData => x, :wfTrigger => 'true'},
                           :headers => {'Content-length' => '0'})
@@ -267,4 +269,3 @@ module ZohoApi
   end
 
 end
-
